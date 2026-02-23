@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { useMediaList } from '@/hooks/useMediaList';
-import { useSeasonalAnime } from '@/hooks/useSeasonalAnime';
+import { useSeasonalAnime, SeasonalFilter } from '@/hooks/useSeasonalAnime';
 import { MediaStatus, MediaType, JikanAnimeResult } from '@/types';
 import Header from '@/components/Header';
 import FilterBar from '@/components/FilterBar';
@@ -16,14 +16,21 @@ import SeasonalAnimeCard from '@/components/SeasonalAnimeCard';
 type StatusFilter = MediaStatus | 'all';
 type TypeFilter = MediaType | 'all';
 
+const tabToFilter: Record<string, SeasonalFilter> = {
+  'seasonal-anime': 'tv',
+  'seasonal-movie': 'movie',
+};
+
 export default function Home() {
   const { items, isLoaded, addItem, removeItem, updateStatus, stats } = useMediaList();
-  const { results: seasonalAnime, isLoading: isSeasonalLoading, error: seasonalError, hasNextPage, loadMore, retry } = useSeasonalAnime();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [activeTab, setActiveTab] = useState<TabType>('mylist');
+
+  const seasonalFilter: SeasonalFilter = tabToFilter[activeTab] ?? 'tv';
+  const { results: seasonalAnime, isLoading: isSeasonalLoading, error: seasonalError, hasNextPage, loadMore, retry } = useSeasonalAnime(seasonalFilter);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
@@ -53,9 +60,10 @@ export default function Home() {
 
   const handleAddFromSeasonal = useCallback((anime: JikanAnimeResult) => {
     if (malIdMap.has(anime.mal_id)) return;
+    const isMovie = anime.type === 'Movie';
     addItem({
       title: anime.title_japanese || anime.title,
-      type: 'anime',
+      type: isMovie ? 'movie' : 'anime',
       status: 'watching',
       coverUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
       synopsis: anime.synopsis || undefined,
@@ -73,12 +81,14 @@ export default function Home() {
     );
   }
 
+  const isSeasonal = activeTab === 'seasonal-anime' || activeTab === 'seasonal-movie';
+
   return (
     <main className="relative min-h-screen pb-12">
       <Header stats={stats} onAddClick={() => setIsModalOpen(true)} />
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {activeTab === 'mylist' ? (
+      {!isSeasonal ? (
         <>
           <FilterBar
             search={search}
@@ -125,7 +135,7 @@ export default function Home() {
           </div>
         </>
       ) : (
-        /* Seasonal Anime Tab */
+        /* Seasonal Tab */
         <div className="relative z-10 px-4 pt-6">
           <div className="max-w-6xl mx-auto">
             {seasonalError && (
@@ -173,7 +183,7 @@ export default function Home() {
                   もっと読み込む
                 </button>
               ) : seasonalAnime.length > 0 ? (
-                <p className="text-white/20 text-xs">すべてのアニメを表示しました</p>
+                <p className="text-white/20 text-xs">すべて表示しました</p>
               ) : null}
             </div>
           </div>

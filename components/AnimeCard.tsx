@@ -62,7 +62,7 @@ export default function AnimeCard({ item, index, onUpdateStatus, onRemove }: Pro
         {/* Type badge */}
         <div className="absolute top-2 left-2">
           <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-dark-900/80 text-white/70 border border-white/10">
-            {item.type === 'anime' ? 'ANIME' : 'MOVIE'}
+            {item.type === 'anime' ? 'ANIME' : 'ANIME MOVIE'}
           </span>
         </div>
 

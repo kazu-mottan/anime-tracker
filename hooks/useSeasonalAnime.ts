@@ -5,16 +5,18 @@ import { JikanAnimeResult, JikanSeasonalResponse } from '@/types';
 
 const JIKAN_BASE_URL = 'https://api.jikan.moe/v4';
 
-export function useSeasonalAnime() {
+export type SeasonalFilter = 'tv' | 'movie';
+
+export function useSeasonalAnime(filter: SeasonalFilter) {
   const [results, setResults] = useState<JikanAnimeResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasNextPage, setHasNextPage] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const fetchedRef = useRef(false);
   const pageRef = useRef(1);
+  const currentFilterRef = useRef(filter);
 
-  const fetchPage = useCallback(async (pageNum: number, append: boolean) => {
+  const fetchPage = useCallback(async (pageNum: number, append: boolean, type: SeasonalFilter) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -26,7 +28,7 @@ export function useSeasonalAnime() {
     setError(null);
 
     try {
-      const url = `${JIKAN_BASE_URL}/seasons/now?page=${pageNum}&limit=25&sfw=true`;
+      const url = `${JIKAN_BASE_URL}/seasons/now?page=${pageNum}&limit=25&sfw=true&filter=${type}`;
       const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
@@ -45,7 +47,7 @@ export function useSeasonalAnime() {
         return;
       }
       setError(
-        err instanceof Error ? err.message : '今季アニメの取得中にエラーが発生しました。'
+        err instanceof Error ? err.message : 'データの取得中にエラーが発生しました。'
       );
     } finally {
       setIsLoading(false);
@@ -53,26 +55,29 @@ export function useSeasonalAnime() {
   }, []);
 
   useEffect(() => {
-    if (!fetchedRef.current) {
-      fetchedRef.current = true;
-      fetchPage(1, false);
+    if (filter !== currentFilterRef.current) {
+      currentFilterRef.current = filter;
+      pageRef.current = 1;
+      setResults([]);
     }
+    fetchPage(1, false, filter);
+
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
     };
-  }, [fetchPage]);
+  }, [filter, fetchPage]);
 
   const loadMore = useCallback(() => {
     const nextPage = pageRef.current + 1;
     pageRef.current = nextPage;
-    fetchPage(nextPage, true);
+    fetchPage(nextPage, true, currentFilterRef.current);
   }, [fetchPage]);
 
   const retry = useCallback(() => {
     pageRef.current = 1;
-    fetchPage(1, false);
+    fetchPage(1, false, currentFilterRef.current);
   }, [fetchPage]);
 
   return { results, isLoading, error, hasNextPage, loadMore, retry };

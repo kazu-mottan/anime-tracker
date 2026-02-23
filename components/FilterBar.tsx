@@ -25,7 +25,7 @@ const statusOptions: { value: StatusFilter; label: string }[] = [
 const typeOptions: { value: TypeFilter; label: string }[] = [
   { value: 'all', label: 'すべて' },
   { value: 'anime', label: 'アニメ' },
-  { value: 'movie', label: '映画' },
+  { value: 'movie', label: 'アニメ映画' },
 ];
 
 export default function FilterBar({

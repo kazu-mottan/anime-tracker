@@ -35,7 +35,7 @@ export default function Header({ stats, onAddClick }: Props) {
               ANIME TRACKER
             </h1>
             <p className="text-white/30 text-sm mt-1 tracking-widest">
-              // あなたの視聴記録
+              // ラフマニの視聴記録
             </p>
           </motion.div>
 

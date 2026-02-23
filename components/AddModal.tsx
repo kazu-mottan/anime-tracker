@@ -212,7 +212,7 @@ export default function AddModal({ isOpen, onClose, onAdd }: Props) {
                     }`}
                   >
                     <Film className="w-4 h-4" />
-                    映画
+                    アニメ映画
                   </button>
                 </div>
               </div>

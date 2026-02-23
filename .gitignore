@@ -6,3 +6,5 @@ out/
 .env.local
 .vercel
 debug_bundle.txt
+
+.vercel
