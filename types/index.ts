@@ -11,6 +11,7 @@ export interface MediaItem {
   note?: string;
   addedAt: string;
   malId?: number;
+  airedYear?: number;
 }
 
 export interface JikanAnimeResult {
@@ -28,6 +29,9 @@ export interface JikanAnimeResult {
   score: number | null;
   episodes: number | null;
   type: string | null;
+  aired?: {
+    from: string | null;
+  };
 }
 
 export interface JikanSearchResponse {

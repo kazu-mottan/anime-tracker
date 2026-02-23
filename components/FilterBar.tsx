@@ -5,6 +5,7 @@ import { MediaStatus, MediaType } from '@/types';
 
 type StatusFilter = MediaStatus | 'all';
 type TypeFilter = MediaType | 'all';
+export type DecadeFilter = 'all' | '2020s' | '2010s' | '2000s' | 'older';
 
 interface Props {
   search: string;
@@ -13,6 +14,8 @@ interface Props {
   onStatusFilterChange: (v: StatusFilter) => void;
   typeFilter: TypeFilter;
   onTypeFilterChange: (v: TypeFilter) => void;
+  decadeFilter: DecadeFilter;
+  onDecadeFilterChange: (v: DecadeFilter) => void;
 }
 
 const statusOptions: { value: StatusFilter; label: string }[] = [
@@ -28,6 +31,14 @@ const typeOptions: { value: TypeFilter; label: string }[] = [
   { value: 'movie', label: 'アニメ映画' },
 ];
 
+const decadeOptions: { value: DecadeFilter; label: string }[] = [
+  { value: 'all', label: 'すべて' },
+  { value: '2020s', label: '2020年代' },
+  { value: '2010s', label: '2010年代' },
+  { value: '2000s', label: '2000年代' },
+  { value: 'older', label: '〜1999' },
+];
+
 export default function FilterBar({
   search,
   onSearchChange,
@@ -35,6 +46,8 @@ export default function FilterBar({
   onStatusFilterChange,
   typeFilter,
   onTypeFilterChange,
+  decadeFilter,
+  onDecadeFilterChange,
 }: Props) {
   return (
     <div className="relative z-10 px-4 pb-4">
@@ -80,6 +93,23 @@ export default function FilterBar({
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
                   typeFilter === value
                     ? 'bg-neon-cyan/20 text-neon-cyan border border-neon-cyan/30'
+                    : 'text-white/40 hover:text-white/70 border border-transparent'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Decade filter */}
+          <div className="flex gap-1 p-1 rounded-lg bg-dark-700 border border-white/5">
+            {decadeOptions.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => onDecadeFilterChange(value)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                  decadeFilter === value
+                    ? 'bg-neon-purple/20 text-neon-purple border border-neon-purple/30'
                     : 'text-white/40 hover:text-white/70 border border-transparent'
                 }`}
               >

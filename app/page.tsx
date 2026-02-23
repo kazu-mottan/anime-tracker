@@ -8,7 +8,7 @@ import { useMediaList } from '@/hooks/useMediaList';
 import { useSeasonalAnime, SeasonalFilter } from '@/hooks/useSeasonalAnime';
 import { MediaStatus, MediaType, JikanAnimeResult } from '@/types';
 import Header from '@/components/Header';
-import FilterBar from '@/components/FilterBar';
+import FilterBar, { DecadeFilter } from '@/components/FilterBar';
 import AnimeCard from '@/components/AnimeCard';
 import AddModal from '@/components/AddModal';
 import TabNav, { TabType } from '@/components/TabNav';
@@ -31,6 +31,7 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
+  const [decadeFilter, setDecadeFilter] = useState<DecadeFilter>('all');
   const [activeTab, setActiveTab] = useState<TabType>('mylist');
 
   const seasonalFilter: SeasonalFilter = tabToFilter[activeTab] ?? 'tv';
@@ -47,9 +48,16 @@ export default function Home() {
       if (typeFilter !== 'all' && item.type !== typeFilter) {
         return false;
       }
+      if (decadeFilter !== 'all' && item.airedYear) {
+        const y = item.airedYear;
+        if (decadeFilter === '2020s' && (y < 2020 || y >= 2030)) return false;
+        if (decadeFilter === '2010s' && (y < 2010 || y >= 2020)) return false;
+        if (decadeFilter === '2000s' && (y < 2000 || y >= 2010)) return false;
+        if (decadeFilter === 'older' && y >= 2000) return false;
+      }
       return true;
     });
-  }, [items, search, statusFilter, typeFilter]);
+  }, [items, search, statusFilter, typeFilter, decadeFilter]);
 
   // Map of malId -> MediaItem for quick lookup
   const malIdMap = useMemo(() => {
@@ -65,6 +73,7 @@ export default function Home() {
   const handleAddFromSeasonal = useCallback((anime: JikanAnimeResult) => {
     if (malIdMap.has(anime.mal_id)) return;
     const isMovie = anime.type === 'Movie';
+    const airedYear = anime.aired?.from ? new Date(anime.aired.from).getFullYear() : undefined;
     addItem({
       title: anime.title_japanese || anime.title,
       type: isMovie ? 'movie' : 'anime',
@@ -72,6 +81,7 @@ export default function Home() {
       coverUrl: anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url,
       synopsis: anime.synopsis || undefined,
       malId: anime.mal_id,
+      airedYear,
     });
   }, [addItem, malIdMap]);
 
@@ -107,6 +117,8 @@ export default function Home() {
             onStatusFilterChange={setStatusFilter}
             typeFilter={typeFilter}
             onTypeFilterChange={setTypeFilter}
+            decadeFilter={decadeFilter}
+            onDecadeFilterChange={setDecadeFilter}
           />
 
           {/* Card Grid */}

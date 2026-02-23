@@ -50,6 +50,7 @@ export function useMediaList(token: string | null) {
     synopsis?: string;
     note?: string;
     malId?: number;
+    airedYear?: number;
   }) => {
     const newItem: MediaItem = {
       id: generateId(),
