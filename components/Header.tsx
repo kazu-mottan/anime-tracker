@@ -31,12 +31,9 @@ export default function Header({ stats, onAddClick }: Props) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight glow-text">
-              ANIME TRACKER
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight glow-text">
+              ラフマニのアニメ帳
             </h1>
-            <p className="text-white/30 text-sm mt-1 tracking-widest">
-              // ラフマニの視聴記録
-            </p>
           </motion.div>
 
           <motion.button

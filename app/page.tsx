@@ -193,7 +193,7 @@ export default function Home() {
       {/* Footer */}
       <div className="relative z-10 text-center pt-12 pb-6">
         <p className="text-white/10 text-xs tracking-widest">
-          ANIME TRACKER v1.0
+          ラフマニのアニメ帳
         </p>
       </div>
 
