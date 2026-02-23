@@ -3,48 +3,55 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MediaItem, MediaStatus, MediaType } from '@/types';
 
-const STORAGE_KEY = 'anime-tracker-list';
-
-const DEFAULT_ITEMS: MediaItem[] = [
-  {
-    id: 'mushoku-tensei',
-    title: '無職転生 〜異世界行ったら本気だす〜',
-    type: 'anime',
-    status: 'watching',
-    note: '転生ファンタジーの最高傑作',
-    addedAt: new Date().toISOString(),
-  },
-];
-
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
-export function useMediaList() {
+export function useMediaList(token: string | null) {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const authHeaders = useCallback(() => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  }), [token]);
+
+  // Fetch all items when token is available
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setItems(JSON.parse(stored));
-      } else {
-        setItems(DEFAULT_ITEMS);
+    if (!token) {
+      setItems([]);
+      setIsLoaded(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchItems() {
+      try {
+        const res = await fetch('/api/items', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error('Fetch failed');
+
+        const data: MediaItem[] = await res.json();
+        if (!cancelled) {
+          setItems(data);
+          setIsLoaded(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setItems([]);
+          setIsLoaded(true);
+        }
       }
-    } catch {
-      // ignore parse errors
     }
-    setIsLoaded(true);
-  }, []);
 
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
-  }, [items, isLoaded]);
+    fetchItems();
+    return () => { cancelled = true; };
+  }, [token]);
 
-  const addItem = useCallback((data: {
+  const addItem = useCallback(async (data: {
     title: string;
     type: MediaType;
     status: MediaStatus;
@@ -58,18 +65,54 @@ export function useMediaList() {
       ...data,
       addedAt: new Date().toISOString(),
     };
+
+    // Optimistic update
     setItems(prev => [newItem, ...prev]);
-  }, []);
 
-  const removeItem = useCallback((id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
-  }, []);
+    try {
+      await fetch('/api/items', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify(newItem),
+      });
+    } catch {
+      // Rollback on error
+      setItems(prev => prev.filter(item => item.id !== newItem.id));
+    }
+  }, [authHeaders]);
 
-  const updateStatus = useCallback((id: string, status: MediaStatus) => {
-    setItems(prev =>
-      prev.map(item => (item.id === id ? { ...item, status } : item))
-    );
-  }, []);
+  const removeItem = useCallback(async (id: string) => {
+    setItems(prev => {
+      const backup = prev;
+      const next = prev.filter(item => item.id !== id);
+
+      fetch(`/api/items/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      }).catch(() => {
+        setItems(backup);
+      });
+
+      return next;
+    });
+  }, [authHeaders]);
+
+  const updateStatus = useCallback(async (id: string, status: MediaStatus) => {
+    setItems(prev => {
+      const backup = prev;
+      const next = prev.map(item => (item.id === id ? { ...item, status } : item));
+
+      fetch(`/api/items/${id}`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify({ status }),
+      }).catch(() => {
+        setItems(backup);
+      });
+
+      return next;
+    });
+  }, [authHeaders]);
 
   const stats = {
     total: items.length,

@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 import { useMediaList } from '@/hooks/useMediaList';
 import { useSeasonalAnime, SeasonalFilter } from '@/hooks/useSeasonalAnime';
 import { MediaStatus, MediaType, JikanAnimeResult } from '@/types';
@@ -12,6 +13,7 @@ import AnimeCard from '@/components/AnimeCard';
 import AddModal from '@/components/AddModal';
 import TabNav, { TabType } from '@/components/TabNav';
 import SeasonalAnimeCard from '@/components/SeasonalAnimeCard';
+import PasswordModal from '@/components/PasswordModal';
 
 type StatusFilter = MediaStatus | 'all';
 type TypeFilter = MediaType | 'all';
@@ -22,7 +24,8 @@ const tabToFilter: Record<string, SeasonalFilter> = {
 };
 
 export default function Home() {
-  const { items, isLoaded, addItem, removeItem, updateStatus, stats } = useMediaList();
+  const { token, isAuthenticated, isChecking, login } = useAuth();
+  const { items, isLoaded, addItem, removeItem, updateStatus, stats } = useMediaList(token);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -70,6 +73,20 @@ export default function Home() {
       malId: anime.mal_id,
     });
   }, [addItem, malIdMap]);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-neon-pink animate-pulse text-lg font-bold tracking-widest">
+          LOADING...
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <PasswordModal onLogin={login} />;
+  }
 
   if (!isLoaded) {
     return (
