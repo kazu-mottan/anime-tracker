@@ -10,9 +10,10 @@ interface Props {
   index: number;
   existingItem?: MediaItem;
   onAdd: (anime: JikanAnimeResult) => void;
+  isEditable?: boolean;
 }
 
-export default function SeasonalAnimeCard({ anime, index, existingItem, onAdd }: Props) {
+export default function SeasonalAnimeCard({ anime, index, existingItem, onAdd, isEditable }: Props) {
   const imageUrl = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
   const title = anime.title_japanese || anime.title;
 
@@ -78,7 +79,7 @@ export default function SeasonalAnimeCard({ anime, index, existingItem, onAdd }:
               <Check className="w-3.5 h-3.5 text-emerald-400" />
               <StatusBadge status={existingItem.status} />
             </div>
-          ) : (
+          ) : isEditable ? (
             <button
               onClick={() => onAdd(anime)}
               className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold
@@ -88,7 +89,7 @@ export default function SeasonalAnimeCard({ anime, index, existingItem, onAdd }:
               <Plus className="w-3.5 h-3.5" />
               ウォッチリストに追加
             </button>
-          )}
+          ) : null}
         </div>
       </div>
     </motion.div>

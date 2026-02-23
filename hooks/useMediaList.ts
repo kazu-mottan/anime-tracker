@@ -16,22 +16,13 @@ export function useMediaList(token: string | null) {
     'Authorization': `Bearer ${token}`,
   }), [token]);
 
-  // Fetch all items when token is available
+  // Fetch all items (no auth required)
   useEffect(() => {
-    if (!token) {
-      setItems([]);
-      setIsLoaded(false);
-      return;
-    }
-
     let cancelled = false;
 
     async function fetchItems() {
       try {
-        const res = await fetch('/api/items', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-
+        const res = await fetch('/api/items');
         if (!res.ok) throw new Error('Fetch failed');
 
         const data: MediaItem[] = await res.json();

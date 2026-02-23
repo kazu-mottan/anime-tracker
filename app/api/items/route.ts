@@ -4,11 +4,7 @@ import { validateToken } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
-  if (!validateToken(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET() {
   const { data, error } = await getSupabase()
     .from('media_items')
     .select('*')

@@ -23,9 +23,10 @@ interface Props {
   index: number;
   onUpdateStatus: (id: string, status: MediaStatus) => void;
   onRemove: (id: string) => void;
+  isEditable?: boolean;
 }
 
-export default function AnimeCard({ item, index, onUpdateStatus, onRemove }: Props) {
+export default function AnimeCard({ item, index, onUpdateStatus, onRemove, isEditable }: Props) {
   const [isSynopsisExpanded, setIsSynopsisExpanded] = useState(false);
 
   return (
@@ -67,12 +68,14 @@ export default function AnimeCard({ item, index, onUpdateStatus, onRemove }: Pro
         </div>
 
         {/* Delete button */}
-        <button
-          onClick={() => onRemove(item.id)}
-          className="absolute top-2 right-2 p-1.5 rounded-lg bg-dark-900/80 text-white/40 hover:text-red-400 hover:bg-red-500/20 transition-all opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+        {isEditable && (
+          <button
+            onClick={() => onRemove(item.id)}
+            className="absolute top-2 right-2 p-1.5 rounded-lg bg-dark-900/80 text-white/40 hover:text-red-400 hover:bg-red-500/20 transition-all opacity-0 group-hover:opacity-100"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Content */}
@@ -107,13 +110,15 @@ export default function AnimeCard({ item, index, onUpdateStatus, onRemove }: Pro
 
         <div className="flex items-center justify-between pt-1">
           <StatusBadge status={item.status} />
-          <button
-            onClick={() => onUpdateStatus(item.id, nextStatus[item.status])}
-            className="flex items-center gap-1 text-[11px] text-white/30 hover:text-neon-cyan transition-colors"
-          >
-            {nextStatusLabel[item.status]}
-            <ChevronRight className="w-3 h-3" />
-          </button>
+          {isEditable && (
+            <button
+              onClick={() => onUpdateStatus(item.id, nextStatus[item.status])}
+              className="flex items-center gap-1 text-[11px] text-white/30 hover:text-neon-cyan transition-colors"
+            >
+              {nextStatusLabel[item.status]}
+              <ChevronRight className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>
     </motion.div>

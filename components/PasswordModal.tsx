@@ -2,13 +2,14 @@
 
 import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Loader2 } from 'lucide-react';
+import { Lock, Loader2, X } from 'lucide-react';
 
 interface Props {
   onLogin: (password: string) => Promise<{ ok: boolean; error?: string }>;
+  onClose?: () => void;
 }
 
-export default function PasswordModal({ onLogin }: Props) {
+export default function PasswordModal({ onLogin, onClose }: Props) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -28,13 +29,21 @@ export default function PasswordModal({ onLogin }: Props) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="flex items-center justify-center px-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-sm"
       >
-        <div className="glass rounded-2xl border border-white/10 p-8 space-y-6">
+        <div className="glass rounded-2xl border border-white/10 p-8 space-y-6 relative">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 p-1 text-white/30 hover:text-white/60 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-full glass border border-neon-cyan/30 mb-2">
               <Lock className="w-6 h-6 text-neon-cyan" />

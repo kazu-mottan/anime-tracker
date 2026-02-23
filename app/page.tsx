@@ -24,9 +24,10 @@ const tabToFilter: Record<string, SeasonalFilter> = {
 };
 
 export default function Home() {
-  const { token, isAuthenticated, isChecking, login } = useAuth();
+  const { token, isAuthenticated, isChecking, login, logout } = useAuth();
   const { items, isLoaded, addItem, removeItem, updateStatus, stats } = useMediaList(token);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
@@ -74,21 +75,7 @@ export default function Home() {
     });
   }, [addItem, malIdMap]);
 
-  if (isChecking) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-neon-pink animate-pulse text-lg font-bold tracking-widest">
-          LOADING...
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <PasswordModal onLogin={login} />;
-  }
-
-  if (!isLoaded) {
+  if (isChecking || !isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-neon-pink animate-pulse text-lg font-bold tracking-widest">
@@ -102,7 +89,13 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen pb-12">
-      <Header stats={stats} onAddClick={() => setIsModalOpen(true)} />
+      <Header
+        stats={stats}
+        onAddClick={() => setIsModalOpen(true)}
+        isAuthenticated={isAuthenticated}
+        onLoginClick={() => setIsLoginOpen(true)}
+        onLogout={logout}
+      />
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {!isSeasonal ? (
@@ -124,7 +117,7 @@ export default function Home() {
                   <p className="text-white/20 text-lg mb-2">
                     {items.length === 0 ? '作品がまだありません' : '条件に一致する作品がありません'}
                   </p>
-                  {items.length === 0 && (
+                  {items.length === 0 && isAuthenticated && (
                     <button
                       onClick={() => setIsModalOpen(true)}
                       className="text-neon-pink/60 hover:text-neon-pink text-sm transition-colors"
@@ -143,6 +136,7 @@ export default function Home() {
                         index={index}
                         onUpdateStatus={updateStatus}
                         onRemove={removeItem}
+                        isEditable={isAuthenticated}
                       />
                     ))}
                   </AnimatePresence>
@@ -178,6 +172,7 @@ export default function Home() {
                     index={index}
                     existingItem={malIdMap.get(anime.mal_id)}
                     onAdd={handleAddFromSeasonal}
+                    isEditable={isAuthenticated}
                   />
                 ))}
               </div>
@@ -214,11 +209,26 @@ export default function Home() {
         </p>
       </div>
 
-      <AddModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAdd={addItem}
-      />
+      {isAuthenticated && (
+        <AddModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onAdd={addItem}
+        />
+      )}
+
+      {!isAuthenticated && isLoginOpen && (
+        <div className="fixed inset-0 z-50 bg-dark-900/80 backdrop-blur-sm flex items-center justify-center px-4">
+          <PasswordModal
+            onLogin={async (pw) => {
+              const result = await login(pw);
+              if (result.ok) setIsLoginOpen(false);
+              return result;
+            }}
+            onClose={() => setIsLoginOpen(false)}
+          />
+        </div>
+      )}
     </main>
   );
 }

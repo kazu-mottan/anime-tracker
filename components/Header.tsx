@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Plus, Tv, Eye, Clock, CalendarCheck } from 'lucide-react';
+import { Plus, Tv, Eye, Clock, CalendarCheck, LogIn, LogOut } from 'lucide-react';
 
 interface Props {
   stats: {
@@ -11,6 +11,9 @@ interface Props {
     planToWatch: number;
   };
   onAddClick: () => void;
+  isAuthenticated: boolean;
+  onLoginClick: () => void;
+  onLogout: () => void;
 }
 
 const statItems = [
@@ -20,7 +23,7 @@ const statItems = [
   { key: 'planToWatch', label: '視聴予定', icon: Clock, color: 'text-pink-400' },
 ] as const;
 
-export default function Header({ stats, onAddClick }: Props) {
+export default function Header({ stats, onAddClick, isAuthenticated, onLoginClick, onLogout }: Props) {
   return (
     <header className="relative z-10 pt-10 pb-6 px-4">
       <div className="max-w-6xl mx-auto">
@@ -36,20 +39,46 @@ export default function Header({ stats, onAddClick }: Props) {
             </h1>
           </motion.div>
 
-          <motion.button
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onAddClick}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm
-              bg-gradient-to-r from-neon-pink to-neon-purple text-white
-              shadow-lg shadow-neon-pink/25 hover:shadow-neon-pink/40 transition-shadow"
+            className="flex items-center gap-2"
           >
-            <Plus className="w-4 h-4" />
-            追加
-          </motion.button>
+            {isAuthenticated ? (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={onAddClick}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm
+                    bg-gradient-to-r from-neon-pink to-neon-purple text-white
+                    shadow-lg shadow-neon-pink/25 hover:shadow-neon-pink/40 transition-shadow"
+                >
+                  <Plus className="w-4 h-4" />
+                  追加
+                </motion.button>
+                <button
+                  onClick={onLogout}
+                  className="p-2.5 rounded-xl glass border border-white/10 text-white/30
+                    hover:text-white/60 hover:border-white/20 transition-all"
+                  title="ログアウト"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={onLoginClick}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs
+                  glass border border-neon-cyan/20 text-neon-cyan/70
+                  hover:border-neon-cyan/40 hover:text-neon-cyan transition-all"
+              >
+                <LogIn className="w-4 h-4" />
+                ログイン
+              </button>
+            )}
+          </motion.div>
         </div>
 
         {/* Stats */}
