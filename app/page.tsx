@@ -48,7 +48,8 @@ export default function Home() {
       if (typeFilter !== 'all' && item.type !== typeFilter) {
         return false;
       }
-      if (decadeFilter !== 'all' && item.airedYear) {
+      if (decadeFilter !== 'all') {
+        if (!item.airedYear) return false;
         const y = item.airedYear;
         if (decadeFilter === '2020s' && (y < 2020 || y >= 2030)) return false;
         if (decadeFilter === '2010s' && (y < 2010 || y >= 2020)) return false;
