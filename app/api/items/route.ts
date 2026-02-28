@@ -26,6 +26,7 @@ export async function GET() {
     malId: row.mal_id,
     addedAt: row.added_at,
     airedYear: row.aired_year,
+    favoriteRank: row.favorite_rank,
   }));
 
   return NextResponse.json(items);
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
       mal_id: body.malId ?? null,
       added_at: body.addedAt,
       aired_year: body.airedYear ?? null,
+      favorite_rank: body.favoriteRank ?? null,
     };
 
     const { data, error } = await getSupabase()
@@ -73,6 +75,7 @@ export async function POST(request: NextRequest) {
       malId: data.mal_id,
       addedAt: data.added_at,
       airedYear: data.aired_year,
+      favoriteRank: data.favorite_rank,
     });
   } catch {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });

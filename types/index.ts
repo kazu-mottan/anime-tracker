@@ -12,6 +12,7 @@ export interface MediaItem {
   addedAt: string;
   malId?: number;
   airedYear?: number;
+  favoriteRank?: number | null;
 }
 
 export interface JikanAnimeResult {

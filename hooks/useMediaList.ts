@@ -106,6 +106,37 @@ export function useMediaList(token: string | null) {
     });
   }, [authHeaders]);
 
+  const reorderFavorites = useCallback(async (orderedIds: string[]) => {
+    const rankings = orderedIds.map((id, index) => ({ id, favoriteRank: index + 1 }));
+
+    // Items that were ranked before but aren't in the new list → unrank
+    const rankedSet = new Set(orderedIds);
+    const unranked = items
+      .filter(item => item.favoriteRank != null && !rankedSet.has(item.id))
+      .map(item => ({ id: item.id, favoriteRank: null as number | null }));
+
+    const allRankings = [...rankings, ...unranked];
+
+    // Optimistic update
+    const backup = items;
+    const rankMap = new Map(allRankings.map(r => [r.id, r.favoriteRank]));
+    setItems(prev =>
+      prev.map(item =>
+        rankMap.has(item.id) ? { ...item, favoriteRank: rankMap.get(item.id) ?? null } : item
+      )
+    );
+
+    try {
+      await fetch('/api/items/reorder', {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ rankings: allRankings }),
+      });
+    } catch {
+      setItems(backup);
+    }
+  }, [authHeaders, items]);
+
   const stats = {
     total: items.length,
     watched: items.filter(i => i.status === 'watched').length,
@@ -113,5 +144,5 @@ export function useMediaList(token: string | null) {
     planToWatch: items.filter(i => i.status === 'plan-to-watch').length,
   };
 
-  return { items, isLoaded, addItem, removeItem, updateStatus, stats };
+  return { items, isLoaded, addItem, removeItem, updateStatus, reorderFavorites, stats };
 }

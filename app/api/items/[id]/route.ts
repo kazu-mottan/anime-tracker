@@ -16,9 +16,17 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
+    const updateData: Record<string, unknown> = {};
+    if (body.status !== undefined) {
+      updateData.status = body.status;
+    }
+    if (body.favoriteRank !== undefined) {
+      updateData.favorite_rank = body.favoriteRank;
+    }
+
     const { error } = await getSupabase()
       .from('media_items')
-      .update({ status: body.status })
+      .update(updateData)
       .eq('id', id);
 
     if (error) {

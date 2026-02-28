@@ -14,6 +14,7 @@ import AddModal from '@/components/AddModal';
 import TabNav, { TabType } from '@/components/TabNav';
 import SeasonalAnimeCard from '@/components/SeasonalAnimeCard';
 import PasswordModal from '@/components/PasswordModal';
+import FavoriteRanking from '@/components/FavoriteRanking';
 
 type StatusFilter = MediaStatus | 'all';
 type TypeFilter = MediaType | 'all';
@@ -25,7 +26,7 @@ const tabToFilter: Record<string, SeasonalFilter> = {
 
 export default function Home() {
   const { token, isAuthenticated, isChecking, login, logout } = useAuth();
-  const { items, isLoaded, addItem, removeItem, updateStatus, stats } = useMediaList(token);
+  const { items, isLoaded, addItem, removeItem, updateStatus, reorderFavorites, stats } = useMediaList(token);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -97,6 +98,7 @@ export default function Home() {
   }
 
   const isSeasonal = activeTab === 'seasonal-anime' || activeTab === 'seasonal-movie';
+  const isFavorites = activeTab === 'favorites';
 
   return (
     <main className="relative min-h-screen pb-12">
@@ -109,7 +111,13 @@ export default function Home() {
       />
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {!isSeasonal ? (
+      {isFavorites ? (
+        <FavoriteRanking
+          items={items}
+          isEditable={isAuthenticated}
+          onReorder={reorderFavorites}
+        />
+      ) : !isSeasonal ? (
         <>
           <FilterBar
             search={search}

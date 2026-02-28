@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { List, Sparkles, Film } from 'lucide-react';
+import { List, Sparkles, Film, Trophy } from 'lucide-react';
 
-export type TabType = 'mylist' | 'seasonal-anime' | 'seasonal-movie';
+export type TabType = 'mylist' | 'favorites' | 'seasonal-anime' | 'seasonal-movie';
 
 interface Props {
   activeTab: TabType;
@@ -12,6 +12,7 @@ interface Props {
 
 const tabs = [
   { key: 'mylist' as const, label: 'マイリスト', icon: List },
+  { key: 'favorites' as const, label: 'お気に入りランキング', icon: Trophy },
   { key: 'seasonal-anime' as const, label: '今季のアニメ', icon: Sparkles },
   { key: 'seasonal-movie' as const, label: '今季のアニメ映画', icon: Film },
 ];
